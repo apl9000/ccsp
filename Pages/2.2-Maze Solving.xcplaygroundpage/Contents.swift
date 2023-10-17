@@ -34,9 +34,6 @@ func printMaze(_ maze: Maze) {
     }
 }
 
-var maze = generateMaze(rows: 20, columns: 20, sparseness: 0.2)
-
-
 struct MazeLocation: Hashable {
     let row: Int
     let col: Int
@@ -170,14 +167,53 @@ func markMaze(_ maze: inout Maze, path: [MazeLocation], start: MazeLocation, goa
 let start = MazeLocation(row: 0, col: 0)
 let goal = MazeLocation(row: 19, col: 19)
 
+print("---------------------- DFS ----------------------")
+var maze = generateMaze(rows: 20, columns: 20, sparseness: 0.2)
 if let solution = dfs(initialState: start, goalTestFn: goalTest, successorFn: successorsForMaze(maze)) {
     let path = nodeToPath(solution)
     markMaze(&maze, path: path, start: start, goal: goal)
     printMaze(maze)
 }
+print("---------------------- DFS ----------------------")
 
 
+// Breadth-first Search (BFS)
+public class Queue<T> {
+    private var container: [T] = [T]()
+    public var isEmpty: Bool { return container.isEmpty }
+    public func push(item: T) { container.append(item) }
+    public func pop() -> T { return container.removeFirst() }
+}
 
+func bfs<StateType: Hashable>(initialState: StateType, goalTestFn: (StateType) -> Bool, successorFn: (StateType) -> [StateType]) -> Node<StateType>? {
+    // Frontier is where you've yet to go
+    let frontier: Queue<Node<StateType>> = Queue<Node<StateType>>()
+    frontier.push(item: Node(state: initialState, parent: nil))
+    // Explored is where you've been
+    var explored: Set<StateType> = Set<StateType>()
+    explored.insert(initialState)
+    // Keep going where there is more to explore!
+    while !frontier.isEmpty {
+        let currentNode = frontier.pop()
+        let currentState = currentNode.state
+        // if we found the goal we win!
+        if goalTestFn(currentState) {
+            return currentNode
+        }
+        for child in successorFn(currentState) where !explored.contains(child) {
+            explored.insert(child)
+            frontier.push(item: Node(state: child, parent: currentNode))
+        }
+    }
+    print("No Solution")
+    return nil
+}
 
-
-
+print("---------------------- BFS ----------------------")
+var maze2 = generateMaze(rows: 20, columns: 20, sparseness: 0.2)
+if let solution = bfs(initialState: start, goalTestFn: goalTest, successorFn: successorsForMaze(maze2)) {
+    let path = nodeToPath(solution)
+    markMaze(&maze2, path: path, start: start, goal: goal)
+    printMaze(maze2)
+}
+print("---------------------- BFS ----------------------")
