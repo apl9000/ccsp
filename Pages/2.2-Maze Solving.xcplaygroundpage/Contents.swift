@@ -1,5 +1,6 @@
 import Foundation
 
+
 enum Cell: Character {
     case Empty = "⬜️"
     case Blocked = "🔥"
@@ -217,3 +218,58 @@ if let solution = bfs(initialState: start, goalTestFn: goalTest, successorFn: su
     printMaze(maze2)
 }
 print("---------------------- BFS ----------------------")
+
+// A-star (A*) search
+
+func aStar<StateType: Hashable>(
+    initialState: StateType,
+    goalTestFn: (StateType) -> Bool,
+    successorFn: (StateType) -> [StateType],
+    heuristicFunc: (StateType) -> Float
+) -> Node<StateType>? {
+    var frontier: PriorityQueue<Node<StateType>> = 
+        PriorityQueue<Node<StateType>>(
+            ascending: true,
+            startingValues: [
+                Node(state: initialState, parent: nil, cost: 0, heuristic: heuristicFunc(initialState))])
+    
+    var explored = Dictionary<StateType, Float>()
+    explored[initialState] = 0
+    
+    while let currentNode = frontier.pop() {
+        let currentState = currentNode.state
+        if goalTestFn(currentState) {
+            return currentNode
+        }
+        
+        for child in successorFn(currentState) {
+            let newCost = currentNode.cost + 1
+            if (explored[child] == nil || explored[child]! > newCost) {
+                explored[child] = newCost
+                frontier.push(Node(state: child, parent: currentNode, cost: newCost, heuristic: heuristicFunc(child)))
+            }
+        }
+    }
+    return nil
+    
+}
+
+func euclideanDistance(ml: MazeLocation) -> Float {
+    let xdist = ml.col - goal.col
+    let ydist = ml.row - goal.row
+    return sqrt(Float((xdist * xdist) + (ydist * ydist)))
+}
+func manhattanDistance(ml: MazeLocation) -> Float {
+    let xdist = abs(ml.col - goal.col)
+    let ydist = abs(ml.col - goal.col)
+    return Float(xdist + ydist)
+}
+
+print("---------------------- A STAR ----------------------")
+var maze3 = generateMaze(rows: 20, columns: 20, sparseness: 0.2)
+if let solution = aStar(initialState: start, goalTestFn: goalTest, successorFn: successorsForMaze(maze3), heuristicFunc: manhattanDistance) {
+    let path = nodeToPath(solution)
+    markMaze(&maze3, path: path, start: start, goal: goal)
+    printMaze(maze3)
+}
+print("---------------------- A STAR ----------------------")
