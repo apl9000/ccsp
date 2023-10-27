@@ -31,8 +31,18 @@ func goalTestMC(state: MCState) -> Bool {
 }
 
 
+func isLegalMc(state: MCState) -> Bool {
+    let nM = state.missionaries
+    let nC = state.cannibals
+    let sM = maxNum - nM
+    let sC = maxNum - nC
+    
+    if nM < nC && nM > 0 { return false }
+    if sM < sC && sM > 0 { return false }
+    return true
+}
 
-func successorFn(state: MCState) -> Bool {
+func successorFn(state: MCState) -> [MCState] {
     let nM = state.missionaries
     let nC = state.cannibals
     let sM = maxNum - nM
@@ -73,4 +83,29 @@ func successorFn(state: MCState) -> Bool {
             success.append(MCState(missionaries: nM + 1, cannibals: nC + 1, boat: !state.boat))
         }
     }
+    return success.filter{ isLegalMc(state: $0) }
+}
+
+func printMCSolution(path: [MCState]) {
+    var oldState = path.first!
+    print(oldState)
+    for currentState in path[1..<path.count] {
+        let nM = currentState.missionaries
+        let nC = currentState.cannibals
+        let sM = maxNum - nM
+        let sC = maxNum - nC
+        if !currentState.boat {
+            print("\(oldState.missionaries - nM) missionaries and \(oldState.cannibals - nC) cannibals moved from the north bank to the east bank")
+        } else {
+            print("\(maxNum - oldState.missionaries - sM) missionaires and \(maxNum - oldState.cannibals - sC) cannibals moved from the south bank to the north bank.")
+        }
+        print(currentState)
+        oldState = currentState
+    }
+}
+
+let startMC = MCState(missionaries: 3, cannibals: 3, boat: true)
+if let solution = bfs(initialState: startMC, goalTestFn: goalTestMC, successorFn: successorFn) {
+    let path = nodeToPath(solution)
+    printMCSolution(path: path)
 }
