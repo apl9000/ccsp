@@ -220,7 +220,6 @@ if let solution = bfs(initialState: start, goalTestFn: goalTest, successorFn: su
 print("---------------------- BFS ----------------------")
 
 // A-star (A*) search
-
 func aStar<StateType: Hashable>(
     initialState: StateType,
     goalTestFn: (StateType) -> Bool,
