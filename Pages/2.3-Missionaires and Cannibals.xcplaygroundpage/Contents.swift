@@ -30,7 +30,6 @@ func goalTestMC(state: MCState) -> Bool {
     return state == MCState(missionaries: 0, cannibals: 0, boat: false)
 }
 
-
 func isLegalMc(state: MCState) -> Bool {
     let nM = state.missionaries
     let nC = state.cannibals
